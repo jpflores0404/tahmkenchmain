@@ -1,0 +1,1562 @@
+@import "tailwindcss";
+
+/* ========== Custom Game Styles ========== */
+
+/* ═══════════════════════════════════════════════════════
+   SLEEK BUREAUCRACY — Government Simulation Theme Tokens
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* Warm earthy background */
+  --gov-bg-0: #e2ba71; /* Wood base */
+  --gov-bg-1: #c6944e; /* Dark wood */
+  --gov-bg-2: #8f5b2b; /* Deep wood */
+  --gov-ink-0: #4a3018; /* Dark brown ink */
+  --gov-ink-1: rgba(74, 48, 24, 0.85);
+  --gov-ink-2: rgba(74, 48, 24, 0.62);
+
+  --gov-emerald: #5c9e31; /* Grass green */
+  --gov-ruby: #cc4f4f; /* Brick red */
+  --gov-gold: #fcc203; /* Gold/yellow */
+  --gov-cyan: #4e8bc6; /* Soft sky blue */
+
+  --gov-glass: rgba(255, 255, 255, 0.62); /* Soft highlight */
+  --gov-glass-2: rgba(255, 245, 220, 0.8); /* Warm paper */
+  --gov-stroke: rgba(100, 60, 20, 0.3); /* Brown stroke */
+  --gov-stroke-2: rgba(143, 91, 43, 0.5); /* Stronger brown stroke */
+
+  --font-display: "Pixelify Sans", monospace;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+/* Background atmosphere: earthy base */
+.gov-shell {
+  background-image: url('/CITYBGWIDE.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+.gov-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 500px at 50% 60%, transparent 0%, rgba(74, 48, 24, 0.1) 75%, rgba(74, 48, 24, 0.3) 100%);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.gov-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Typography defaults */
+.gov-text {
+  font-family: var(--font-body);
+  color: var(--gov-ink-0);
+}
+.gov-heading {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+}
+
+/* Health bar gradient: green → yellow → red */
+.trust-bar {
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+  background-size: 200% 100%;
+  transition: width 0.5s ease, background-position 0.5s ease;
+}
+
+/* Card glow on hover */
+.card-glow:hover {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  transform: translateY(-4px);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARDS — Government docket aesthetic
+   ═══════════════════════════════════════════════════════ */
+
+.gov-card {
+  transform: translateZ(0);
+  transition: transform 180ms ease;
+  will-change: transform;
+}
+.gov-card.gov-card--hand:not(.gov-card--facedown):hover {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 22px rgba(34, 211, 238, 0.14);
+}
+.gov-card.gov-card--hand:active {
+}
+
+.gov-card--facedown {
+  transform: perspective(900px) rotateY(180deg);
+  /* No drop-shadow here — it compounds across all stacked deck cards and creates a large ellipse */
+}
+
+.gov-card-face {
+  border: 4px solid #704720; /* thick wooden border */
+  border-radius: 8px;
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.gov-card--deck .gov-card-face {
+  box-shadow:
+    2px 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.gov-card-face--front {
+  background: #faedcd; /* Light parchment */
+  background-image: 
+    radial-gradient(#e6cc98 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+.gov-card--infra .gov-card-face--front {
+  background-color: #dbe4c6; /* light earthy green */
+}
+
+.gov-card--reform .gov-card-face--front {
+  background-color: #e8d8c8; /* warm blush */
+}
+
+.gov-card--policy .gov-card-face--front {
+  background-color: #caddf0; /* soft blue */
+}
+
+.gov-card-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.65);
+  font-size: 18px;
+}
+
+.gov-card-body {
+  margin-top: 6px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 8px 8px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(100, 60, 20, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+.gov-card-cost {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  background: #cc4f4f; /* soft red badge */
+  border: 2px solid #5a1f1f;
+  padding: 5px 10px;
+  border-radius: 8px;
+  align-self: center;
+}
+.gov-card-brief {
+  font-size: 15px;
+  color: #4a3018; /* dark brown */
+  letter-spacing: 0.1em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.gov-card-divider {
+  height: 2px;
+  width: 100%;
+  background: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h2v2H0V0zm2 2h2v2H2V2z' fill='%23643c14' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E") repeat-x;
+}
+.gov-card-desc {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 500;
+  color: #3b2512;
+}
+.gov-card-rewards {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.16);
+}
+.gov-card-reward {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
+}
+.gov-card-reward--good {
+  color: rgba(16, 185, 129, 0.92);
+}
+.gov-card-reward--bad {
+  color: rgba(239, 68, 68, 0.88);
+}
+
+.gov-card-face--back {
+  background: #c6944e; /* Wood block */
+  background-image: 
+    repeating-linear-gradient(90deg, rgba(74, 48, 24, 0.1) 0px, rgba(74, 48, 24, 0.1) 2px, transparent 2px, transparent 12px);
+}
+.gov-card-face--back::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 4px;
+  border: 2px solid rgba(74, 48, 24, 0.4);
+  pointer-events: none;
+}
+
+.gov-card-stamp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-14deg);
+  pointer-events: none;
+  z-index: 60;
+}
+.gov-card-stamp-inner {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(239, 68, 68, 0.55);
+  background: rgba(2, 6, 23, 0.62);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.18), 0 0 26px rgba(239, 68, 68, 0.16);
+}
+.gov-card-stamp-top {
+  font-size: 14px;
+  color: rgba(239, 68, 68, 0.92);
+  text-shadow: 0 0 16px rgba(239, 68, 68, 0.22);
+  text-transform: uppercase;
+}
+.gov-card-stamp-sub {
+  margin-top: 2px;
+  font-size: 10px;
+  color: rgba(226, 232, 240, 0.7);
+  font-family: var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gov-card--corrupt .gov-card-face--front {
+  box-shadow:
+    0 12px 24px rgba(204, 79, 79, 0.35),
+    0 0 0 4px #8b2b2b,
+    inset 0 0 0 2px rgba(204, 79, 79, 0.3);
+}
+/* Removed glitch effect, instead a slow heartbeat throb */
+.gov-card--corrupt {
+  animation: bad-throb 3s ease-in-out infinite;
+}
+@keyframes bad-throb {
+  0%, 100% { filter: contrast(1); }
+  50% { filter: contrast(1.1) sepia(0.2) hue-rotate(-10deg); }
+}
+
+.gov-chip {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  padding: 3px 6px;
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: rgba(226, 232, 240, 0.72);
+  text-transform: uppercase;
+}
+.gov-chip--cert {
+  border-color: rgba(16, 185, 129, 0.22);
+  color: rgba(16, 185, 129, 0.92);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.12);
+}
+.gov-chip--policy {
+  border-color: rgba(34, 211, 238, 0.22);
+  color: rgba(34, 211, 238, 0.92);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.12);
+}
+.gov-chip--blueprint {
+  border-color: rgba(148, 163, 184, 0.18);
+  color: rgba(148, 163, 184, 0.90);
+}
+
+/* Card shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.pending-shimmer {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Chibi placeholder */
+.chibi-placeholder {
+  image-rendering: pixelated;
+  border: 2px dashed #64748b;
+  background: repeating-linear-gradient(
+    45deg,
+    #1e293b,
+    #1e293b 5px,
+    #0f172a 5px,
+    #0f172a 10px
+  );
+}
+
+/* Slot drop target highlight */
+.slot-highlight {
+  border-color: #5c9e31 !important; /* grass green */
+  box-shadow:
+    0 0 0 4px rgba(92, 158, 49, 0.4),
+    inset 0 0 10px rgba(92, 158, 49, 0.2);
+}
+
+.slot-highlight-support {
+  border-color: #22c55e !important;
+  box-shadow: 
+    0 0 15px 2px rgba(34, 197, 94, 0.6),
+    inset 0 0 12px rgba(34, 197, 94, 0.3) !important;
+  transform: scale(1.01);
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ARENA SLOTS — Construction blueprints
+   ═══════════════════════════════════════════════════════ */
+
+.arena-slot {
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 180ms ease, filter 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.arena-slot--empty {
+  border: 2px solid rgba(143, 91, 43, 0.5); /* translucent border */
+  background: rgba(198, 148, 78, 0.3); /* translucent light brown */
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+.arena-slot--empty::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 4px;
+  border: 2px dashed rgba(74, 48, 24, 0.3); /* wood dash */
+  opacity: 0.85;
+  pointer-events: none;
+}
+.arena-slot--droppable:hover {
+  filter: drop-shadow(0 0 8px rgba(92, 158, 49, 0.4));
+  transform: translateY(-2px);
+  border-color: #5c9e31;
+  background-color: #e2ba71;
+}
+
+.arena-slot--occupied {
+  background: transparent;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODALS / EVENTS
+   ═══════════════════════════════════════════════════════ */
+
+.gov-modal {
+  width: min(420px, 92vw);
+  border-radius: 16px;
+  border: 4px solid #8f5b2b; /* wood border */
+  background: #faedcd; /* parchment background */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  padding: 18px 18px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.gov-modal::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 8px;
+  border: 2px solid rgba(143, 91, 43, 0.3); /* dark brown border */
+  pointer-events: none;
+}
+/* Removed scanline animation */
+.gov-modal-top {
+  font-size: 10px;
+  color: #8f5b2b; /* dark brown */
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: bold;
+}
+.gov-modal-title {
+  margin-top: 6px;
+  font-size: 22px;
+  color: #4a3018; /* dark brown */
+  text-transform: uppercase;
+}
+.gov-modal-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #3b2512;
+  font-family: var(--font-body);
+  line-height: 1.45;
+  font-weight: 500;
+}
+.gov-modal-dots {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.gov-modal-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(143, 91, 43, 0.55);
+  box-shadow: 0 0 8px rgba(143, 91, 43, 0.15);
+  animation: gov-dot 0.9s ease-in-out infinite;
+}
+
+/* Thinking dots — warm earthy bounce */
+.gov-thinking-dots {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.gov-thinking-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #8f5b2b;
+  box-shadow: 0 1px 3px rgba(74, 48, 24, 0.3);
+  animation: gov-dot 0.9s ease-in-out infinite;
+}
+@keyframes gov-dot {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+
+.gov-choice {
+  flex: 1;
+  border-radius: 8px;
+  border: 2px solid #8f5b2b; /* wood border */
+  padding: 12px 12px;
+  text-align: left;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  position: relative;
+  overflow: hidden;
+  background: #fcebc4;
+}
+.gov-choice:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.gov-choice-title {
+  font-size: 14px;
+  color: #4a3018;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.gov-choice-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #643c14;
+  font-family: var(--font-body);
+}
+.gov-choice--investigate {
+  background: #f4dada; /* soft red backing */
+  border-color: #cc4f4f;
+}
+.gov-choice--pass {
+  background: #fcebc4;
+}
+.gov-choice--honest {
+  background: #daeed6; /* soft green backing */
+  border-color: #5c9e31;
+}
+.gov-choice--corrupt {
+  background: #f4dada;
+  border-color: #cc4f4f;
+}
+.gov-choice--disabled {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.gov-event-wrap {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+}
+.gov-event {
+  width: min(680px, 92vw);
+  padding: 26px 28px 22px;
+  border-radius: 14px;
+  border: 5px solid #8f5b2b;
+  background: #faedcd;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+.gov-event::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 10px;
+  border: 2px dashed rgba(143, 91, 43, 0.3);
+  pointer-events: none;
+}
+.gov-event-kicker {
+  font-size: 26px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: #4a3018;
+  font-weight: bold;
+}
+.gov-event-quote {
+  margin-top: 8px;
+  font-size: 15px;
+  color: #643c14;
+  font-family: var(--font-body);
+  font-style: italic;
+}
+.gov-event-body {
+  margin-top: 12px;
+  font-size: 18px;
+  color: #3b2512;
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+.gov-event--scandal {
+  border-color: #cc4f4f;
+  background: #f4dada;
+}
+.gov-event--scandal .gov-event-kicker {
+  color: #8b2b2b;
+}
+/* Removed glitch effect */
+.gov-event--integrity {
+  border-color: #fcc203;
+  background: #fff8e1;
+}
+.gov-event--integrity .gov-event-kicker {
+  color: #9e7602;
+}
+.gov-event--pass .gov-event-kicker {
+  color: #4e8bc6;
+}
+
+.gov-sparkles {
+  position: absolute;
+  inset: -40px;
+  background:
+    radial-gradient(circle at 15% 35%, rgba(245, 158, 11, 0.18) 0%, transparent 35%),
+    radial-gradient(circle at 75% 40%, rgba(245, 158, 11, 0.14) 0%, transparent 35%),
+    radial-gradient(circle at 55% 80%, rgba(245, 158, 11, 0.16) 0%, transparent 40%),
+    radial-gradient(circle at 30% 70%, rgba(34, 211, 238, 0.10) 0%, transparent 38%);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  animation: gov-spark 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes gov-spark {
+  0%, 100% { transform: translateY(0); opacity: 0.65; }
+  50% { transform: translateY(-6px); opacity: 0.95; }
+}
+
+.gov-shake {
+  animation: gov-shake 420ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+@keyframes gov-shake {
+  0% { transform: translate(0,0); }
+  15% { transform: translate(-3px, 2px); }
+  30% { transform: translate(3px, -2px); }
+  45% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 1px); }
+  75% { transform: translate(-1px, 0px); }
+  100% { transform: translate(0,0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS — Turn controls
+   ═══════════════════════════════════════════════════════ */
+
+.gov-btn {
+  font-family: var(--font-display);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid #8f5b2b;
+  background: #e2ba71;
+  color: #4a3018;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), inset 0 -4px 0 rgba(0,0,0,0.1);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.gov-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25), inset 0 -4px 0 rgba(0,0,0,0.1);
+  background: #ebc680;
+}
+.gov-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), inset 0 2px 0 rgba(0,0,0,0.1);
+}
+.gov-btn--start {
+  background: #5c9e31;
+  border-color: #3b6e1b;
+  color: #fff;
+}
+.gov-btn--start:hover {
+  background: #6bc238;
+}
+.gov-btn--end {
+  background: #fcc203;
+  border-color: #9e7602;
+  color: #4a3018;
+}
+.gov-btn--end:hover {
+  background: #fcd442;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DECK TAG
+   ═══════════════════════════════════════════════════════ */
+
+.gov-deck-tag {
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(10px);
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  color: rgba(226, 232, 240, 0.76);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.40), inset 0 0 0 1px rgba(34, 211, 238, 0.05);
+}
+
+.gov-deck-empty {
+  border-radius: 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.18);
+  background:
+    repeating-linear-gradient(0deg, rgba(148, 163, 184, 0.08) 0px, rgba(148, 163, 184, 0.08) 1px, transparent 1px, transparent 12px),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.50), rgba(2, 6, 23, 0.60));
+  color: rgba(148, 163, 184, 0.60);
+  font-family: var(--font-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+/* ═══════════════════════════════════════════════════════
+   YU-GI-OH MASTER DUEL — HUD STYLES
+   Futuristic cyberspace aesthetic with neon glow effects
+   ═══════════════════════════════════════════════════════ */
+/* (Legacy styles kept; new HUD uses .gov-hud*) */
+
+/* ═══════════════════════════════════════════════════════
+   GOVERNMENT DASHBOARD HUD — frosted glass + seals
+   ═══════════════════════════════════════════════════════ */
+
+.gov-hud {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: 380px;
+  z-index: 90;
+  pointer-events: auto;
+}
+
+.gov-hud-glass {
+  position: relative;
+  background: #faedcd;
+  background-image: linear-gradient(135deg, #faedcd 0%, #f5e6c8 100%);
+  border: 4px solid #8f5b2b;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 40px rgba(143, 91, 43, 0.1);
+}
+
+.gov-hud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 0;
+}
+
+.gov-hud-cell {
+  padding: 14px 16px;
+  position: relative;
+}
+
+/* Right column cells get a left border */
+.gov-hud-cell:nth-child(2) {
+  border-left: 1px solid rgba(143, 91, 43, 0.2);
+}
+
+/* Bottom row cells get a top border */
+.gov-hud-cell:nth-child(3) {
+  border-top: 1px solid rgba(143, 91, 43, 0.2);
+}
+
+/* Third cell spans both columns */
+.gov-hud-cell:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+/* ── Corruption tooltip ── */
+.gov-corruption-tooltip {
+  position: absolute;
+  left: calc(100% + 14px);
+  bottom: 0;
+  width: 300px;
+  padding: 16px 18px;
+  background: #faedcd;
+  border: 3px solid #8f5b2b;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: #3b2512;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(8px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  z-index: 200;
+}
+
+/* Left-pointing arrow */
+.gov-corruption-tooltip::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  bottom: 20px;
+  border-width: 10px 10px 10px 0;
+  border-style: solid;
+  border-color: transparent #8f5b2b transparent transparent;
+}
+
+.gov-corruption-tooltip-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: bold;
+  color: #8b2b2b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.gov-corruption-tooltip p {
+  margin: 0 0 6px 0;
+}
+.gov-corruption-tooltip p:last-child {
+  margin-bottom: 0;
+}
+
+.gov-corruption-hover:hover .gov-corruption-tooltip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.gov-hud-kicker-lg {
+  font-size: 13px;
+  color: var(--gov-ink-0);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.gov-hud-sub-lg {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.gov-hud-sub-label-lg {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(74, 48, 24, 0.75);
+}
+.gov-hud-sub-val-lg {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: #8f5b2b;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.gov-hud-mini-lg {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.gov-hud-mini-den-lg {
+  font-family: var(--font-display);
+  color: rgba(100, 60, 20, 0.65);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+
+.gov-coin {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(245, 158, 11, 0.95);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.22), transparent 50%),
+    radial-gradient(circle at 60% 65%, rgba(245, 158, 11, 0.26), transparent 55%),
+    linear-gradient(180deg, rgba(245, 158, 11, 0.18), rgba(2, 6, 23, 0.55));
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12), 0 10px 26px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-display);
+}
+
+.gov-seal {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: rgba(16, 185, 129, 0.92);
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.12));
+}
+.gov-seal--ok {
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), transparent 55%),
+    linear-gradient(180deg, rgba(92,158,49,0.35), rgba(92,158,49,0.18));
+  border: 1px solid rgba(92, 158, 49, 0.55);
+  color: #3b6e1b;
+}
+.gov-seal--broken {
+  color: rgba(143, 91, 43, 0.35);
+  background: linear-gradient(180deg, rgba(143,91,43,0.14), rgba(198,148,78,0.1));
+  border: 1px solid rgba(143, 91, 43, 0.22);
+  filter: grayscale(0.35);
+}
+.gov-seal-svg {
+  width: 22px;
+  height: 22px;
+}
+.gov-seal-crack {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, transparent 0%, rgba(239, 68, 68, 0.0) 35%, rgba(239, 68, 68, 0.65) 50%, rgba(239, 68, 68, 0.0) 65%, transparent 100%),
+    linear-gradient(200deg, transparent 0%, rgba(239, 68, 68, 0.0) 30%, rgba(239, 68, 68, 0.55) 52%, rgba(239, 68, 68, 0.0) 70%, transparent 100%);
+  opacity: 0.9;
+  mix-blend-mode: screen;
+  clip-path: polygon(30% 0%, 70% 0%, 62% 100%, 26% 100%);
+}
+
+.gov-dp-diamond {
+  width: 16px;
+  height: 16px;
+  transform: rotate(45deg);
+  border-radius: 3px;
+  border: 2px solid rgba(148, 163, 184, 0.25);
+  transition: filter 220ms ease, transform 220ms ease, background-color 220ms ease;
+}
+.gov-dp-diamond--dim {
+  background: rgba(2, 6, 23, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(2, 6, 23, 0.35);
+}
+.gov-dp-diamond--lit {
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(180deg, rgba(245, 158, 11, 0.72), rgba(245, 158, 11, 0.22));
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow:
+    0 0 16px rgba(245, 158, 11, 0.25),
+    0 0 50px rgba(245, 158, 11, 0.10);
+  filter: saturate(1.1);
+}
+.gov-dp-diamond--goal.gov-dp-diamond--dim {
+  border-color: rgba(245, 158, 11, 0.18);
+}
+.gov-dp-diamond--bonus.gov-dp-diamond--dim {
+  border-color: rgba(34, 211, 238, 0.10);
+}
+
+/* ═══════════════════════════════════════════════════════
+   OPPONENT HUD — Rectangular grid (matches player HUD)
+   ═══════════════════════════════════════════════════════ */
+
+.gov-opponent-hud {
+  width: 380px;
+  pointer-events: auto;
+}
+
+.gov-opponent-hud-glass {
+  position: relative;
+  background: #faedcd;
+  background-image: linear-gradient(135deg, #faedcd 0%, #f5e6c8 100%);
+  border: 4px solid #8f5b2b;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 0 40px rgba(143, 91, 43, 0.1);
+}
+
+.gov-opponent-hud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.gov-opponent-hud-cell {
+  padding: 14px 16px;
+  position: relative;
+}
+
+/* Right column cells get a left border */
+.gov-opponent-hud-cell:nth-child(2),
+.gov-opponent-hud-cell:nth-child(4) {
+  border-left: 1px solid rgba(143, 91, 43, 0.2);
+}
+
+/* Bottom row cells get a top border */
+.gov-opponent-hud-cell:nth-child(3),
+.gov-opponent-hud-cell:nth-child(4) {
+  border-top: 1px solid rgba(143, 91, 43, 0.2);
+}
+
+.gov-opponent-hud-kicker {
+  font-size: 13px;
+  color: var(--gov-ink-0);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.gov-opponent-hud-sub {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.gov-opponent-hud-sub-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(74, 48, 24, 0.75);
+}
+.gov-opponent-hud-sub-val {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: #8f5b2b;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MINI PANELS — opponent HUD corners (legacy)
+   ═══════════════════════════════════════════════════════ */
+
+.gov-mini-panel {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #faedcd;
+  border: 4px solid #8f5b2b;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.gov-mini-panel--stats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 8px;
+}
+.gov-mini-label {
+  font-size: 10px;
+  color: rgba(74, 48, 24, 0.72);
+  text-transform: uppercase;
+}
+.gov-mini-den {
+  font-size: 11px;
+  color: rgba(74, 48, 24, 0.72);
+  text-transform: uppercase;
+}
+.gov-mini-bar {
+  height: 6px;
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(143, 91, 43, 0.2);
+  border: 1px solid rgba(143, 91, 43, 0.3);
+  overflow: hidden;
+}
+.gov-mini-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5c9e31, #8dc84c);
+  box-shadow: 0 0 8px rgba(92, 158, 49, 0.3);
+}
+.gov-mini-seal {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(143, 91, 43, 0.3);
+  background: rgba(198, 148, 78, 0.25);
+}
+.gov-mini-seal--ok {
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), transparent 60%),
+    linear-gradient(180deg, rgba(92, 158, 49, 0.45), rgba(92, 158, 49, 0.2));
+  border-color: rgba(92, 158, 49, 0.5);
+}
+.gov-mini-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  min-width: 86px;
+}
+.gov-mini-stat-k {
+  font-size: 10px;
+  color: rgba(74, 48, 24, 0.62);
+  letter-spacing: 0.1em;
+}
+.gov-mini-stat-v {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: #4a3018;
+  letter-spacing: 0.08em;
+}
+.gov-mini-dp {
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  border-radius: 1.5px;
+  background: rgba(143, 91, 43, 0.18);
+  border: 1px solid rgba(143, 91, 43, 0.25);
+}
+.gov-mini-dp--lit {
+  background: rgba(204, 120, 20, 0.85);
+  border-color: rgba(204, 120, 20, 0.5);
+  box-shadow: 0 0 6px rgba(204, 120, 20, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════
+   OPPONENT SCAN — "Scanning for Corruption..."
+   ═══════════════════════════════════════════════════════ */
+
+.gov-opponent-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 14px;
+  overflow: hidden;
+  z-index: 60;
+  background:
+    radial-gradient(500px 220px at 50% 45%, rgba(252, 194, 3, 0.1) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(74, 48, 24, 0.72), rgba(74, 48, 24, 0.25));
+  border: 1px solid rgba(143, 91, 43, 0.3);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+.gov-opponent-scan-line {
+  position: absolute;
+  left: -30%;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(252, 194, 3, 0.2), transparent);
+  animation: gov-sweep 1.25s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes gov-sweep {
+  0% { transform: translateX(0); opacity: 0.35; }
+  45% { opacity: 0.9; }
+  100% { transform: translateX(350%); opacity: 0.45; }
+}
+.gov-opponent-scan-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+}
+.gov-opponent-scan-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+.gov-opponent-scan-title {
+  font-size: 18px;
+  color: #fcc203;
+  text-shadow: 0 0 12px rgba(252, 194, 3, 0.25), 0 2px 0 rgba(74, 48, 24, 0.6);
+}
+.gov-opponent-scan-sub {
+  font-size: 12px;
+  color: rgba(250, 237, 205, 0.75);
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+}
+
+/* ── Main container ── */
+.hud-master-duel {
+  position: relative;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+}
+
+/* ── Outer frame ── */
+.hud-frame {
+  position: relative;
+  background: #8f5b2b; /* Solid wood border wrapper */
+  border-radius: 8px;
+  padding: 4px;
+}
+
+/* Removed scanline animation */
+
+/* ── Inner content area ── */
+.hud-inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 6px 16px;
+  background: #faedcd; /* Paper inside wood frame */
+  border-radius: 4px;
+}
+
+/* ── Section containers ── */
+.hud-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 12px;
+  position: relative;
+}
+
+.hud-section-trust {
+  padding: 4px 16px;
+  min-width: 160px;
+}
+
+.hud-section-stat {
+  min-width: 60px;
+}
+
+/* ── Labels ── */
+.hud-label {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: rgba(143, 91, 43, 0.7);
+  text-transform: uppercase;
+  text-shadow: none;
+  margin-bottom: 2px;
+}
+
+/* ── Stat value container ── */
+.hud-stat-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+}
+
+/* ── Trust bar ── */
+.hud-trust-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.hud-trust-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 3px;
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.hud-trust-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.hud-trust-glow {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  height: calc(100% + 4px);
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.3), rgba(74, 222, 128, 0.5));
+  filter: blur(4px);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+}
+
+.hud-trust-value {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+/* ── Vertical dividers ── */
+.hud-divider {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(143, 91, 43, 0.2) 30%,
+    rgba(143, 91, 43, 0.4) 50%,
+    rgba(143, 91, 43, 0.2) 70%,
+    transparent 100%
+  );
+  flex-shrink: 0;
+}
+
+/* ── Number flash animation ── */
+.hud-number-flash {
+  animation: numberPulse 0.4s ease-out;
+}
+
+@keyframes numberPulse {
+  0% { transform: scale(1.3); filter: brightness(2); }
+  50% { transform: scale(1.15); filter: brightness(1.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* ── Diamond fill animation ── */
+.hud-diamond-filled {
+  animation: diamondPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes diamondPop {
+  0% { transform: rotate(45deg) scale(0.5); opacity: 0; }
+  60% { transform: rotate(45deg) scale(1.3); }
+  100% { transform: rotate(45deg) scale(1); opacity: 1; }
+}
+
+/* ── Ambient corner accents ── */
+.hud-frame::before,
+.hud-frame::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(143, 91, 43, 0.4);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.hud-frame::before {
+  top: 2px;
+  left: 2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.hud-frame::after {
+  bottom: 2px;
+  right: 2px;
+  border-left: none;
+  border-top: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HAND TRAY — Cards peek from the bottom, rise on hover
+   ═══════════════════════════════════════════════════════ */
+
+.hand-tray {
+  position: relative;
+  height: 280px;
+  width: min(1100px, 96vw);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 12px;
+  overflow: visible;
+}
+
+.hand-card-slot {
+  position: absolute;
+  bottom: 0;
+  transition: z-index 0s;
+}
+
+.hand-tray--dimmed {
+  opacity: 0.55;
+  filter: saturate(0.65) brightness(0.9);
+  pointer-events: none;
+}
+
+.hand-card-hover-glow {
+  filter: drop-shadow(0 0 14px rgba(252, 194, 3, 0.25));
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD PREVIEW PANEL — Left side, Master Duel style
+   ═══════════════════════════════════════════════════════ */
+
+.card-preview-anchor {
+  position: absolute;
+  left: 32px;
+  top: 45%;
+  transform: translateY(-50%) scale(1.6);
+  transform-origin: left center;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.card-preview-panel {
+  width: 220px;
+  height: 360px;
+  background: #faedcd;
+  border: 4px solid #8f5b2b;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.card-preview-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.card-preview-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(143, 91, 43, 0.35) rgba(198, 148, 78, 0.15);
+}
+.card-preview-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.card-preview-scroll::-webkit-scrollbar-thumb {
+  background: rgba(143, 91, 43, 0.35);
+  border-radius: 999px;
+  border: 2px solid rgba(198, 148, 78, 0.2);
+}
+.card-preview-scroll::-webkit-scrollbar-track {
+  background: rgba(198, 148, 78, 0.1);
+}
+
+/* Removed preview panel sci-fi scanlines */
+
+/* ═══════════════════════════════════════════════════════
+   SUPPORT CARD LOG — Right-side indicator
+   ═══════════════════════════════════════════════════════ */
+
+.support-log-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 380px;
+  width: 100%;
+}
+
+.support-log-section {
+  border-radius: 10px;
+  border: 3px solid rgba(143, 91, 43, 0.5);
+  background: rgba(250, 237, 205, 0.92);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.support-log-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  font-weight: bold;
+  border-bottom: 2px solid rgba(143, 91, 43, 0.25);
+}
+.support-log-header--ai {
+  background: rgba(204, 79, 79, 0.15);
+  color: #8b2b2b;
+}
+.support-log-header--player {
+  background: rgba(92, 158, 49, 0.15);
+  color: #3b6e1b;
+}
+
+.support-log-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.support-log-card {
+  padding: 10px 14px;
+  border-bottom: 1px dashed rgba(143, 91, 43, 0.15);
+}
+.support-log-card:last-child {
+  border-bottom: none;
+}
+
+.support-log-card-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  color: #4a3018;
+}
+
+.support-log-card-desc {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  color: #643c14;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CORRUPTION WHEEL
+   ═══════════════════════════════════════════════════════ */
+
+.corruption-wheel {
+  position: relative;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  border: 8px solid #f8e4b6;
+  background:
+    conic-gradient(#8b1e1e 0deg 252deg, #166534 252deg 360deg);
+  box-shadow:
+    inset 0 0 0 8px rgba(0, 0, 0, 0.18),
+    0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.corruption-wheel::after {
+  content: "";
+  position: absolute;
+  inset: 50px;
+  border-radius: 50%;
+  background: #fcebc4;
+  border: 4px solid rgba(90, 51, 17, 0.35);
+}
+
+.corruption-wheel-label {
+  position: absolute;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #fff7df;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.corruption-wheel-label--fail {
+  left: 34px;
+  top: 82px;
+  font-size: 20px;
+}
+
+.corruption-wheel-label--success {
+  right: 18px;
+  bottom: 56px;
+  width: 82px;
+  font-size: 15px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.corruption-wheel-pointer {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: -18px;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 30px solid #241305;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4));
+}
+
+@keyframes corruptionWheelSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(2680deg);
+  }
+}

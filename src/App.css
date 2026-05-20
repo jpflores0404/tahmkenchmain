@@ -1,0 +1,37 @@
+/* ═══ Outer wrapper: centers the 16:9 game container ═══ */
+.game-container-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: #fcebc4; /* Warm parchment/cream */
+  background-image: radial-gradient(#d1a454 1px, transparent 1px);
+  background-size: 20px 20px;
+  overflow: hidden;
+}
+
+.game-container-wrapper.fullscreen-mode {
+  background-color: #1a0e05;
+  background-image: none;
+}
+
+/* ═══ The game container itself: fixed reference size, scaled by JS ═══ */
+.game-container {
+  /* Fixed reference size — JS ResizeObserver applies scale transform */
+  width: 1920px;
+  height: 1080px;
+  /* 12px rounded corners */
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.2),
+    0 0 0 10px #704720; /* Wood-like border */
+  position: relative;
+  transition: border-radius 0.3s ease, box-shadow 0.3s ease;
+}
+
+.fullscreen-mode .game-container {
+  border-radius: 0;
+  box-shadow: none;
+}
