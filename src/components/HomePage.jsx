@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import CardBinderModal from '../features/card-binder/CardBinderModal';
 import './HomePage.css';
 
+const HOME_BUTTON_SOUND_SRC = '/sfx/home-button.mp3';
+
 export default function HomePage() {
   const [showOptions, setShowOptions] = useState(false);
   const [showBinder, setShowBinder] = useState(false);
@@ -33,6 +35,16 @@ export default function HomePage() {
         audio.currentTime = 0;
       })
       .catch(() => {});
+  };
+
+  const playButtonSound = () => {
+    const savedSfxVolume = localStorage.getItem('sfxVolume');
+    const sfxVolume = savedSfxVolume !== null ? parseFloat(savedSfxVolume) : 0.78;
+    if (sfxVolume <= 0) return;
+
+    const audio = new Audio(HOME_BUTTON_SOUND_SRC);
+    audio.volume = Math.min(1, Math.max(0, sfxVolume));
+    audio.play().catch(() => {});
   };
 
   useEffect(() => {
@@ -85,6 +97,7 @@ export default function HomePage() {
 
   const toggleMute = (e) => {
     e.stopPropagation();
+    playButtonSound();
     if (isMuted) {
       setIsMuted(false);
       if (volume === 0) {
@@ -104,6 +117,7 @@ export default function HomePage() {
 
   const handleStart = (e) => {
     e.stopPropagation();
+    playButtonSound();
     setShowOptions(true);
     handleInteraction();
     primeDrawSound();
@@ -111,6 +125,7 @@ export default function HomePage() {
 
   const handleNormalGame = (e) => {
     e.stopPropagation();
+    playButtonSound();
     handleInteraction();
     primeDrawSound();
     navigate('/play?mode=normal');
@@ -118,6 +133,7 @@ export default function HomePage() {
 
   const handleQuickplay = (e) => {
     e.stopPropagation();
+    playButtonSound();
     handleInteraction();
     primeDrawSound();
     navigate('/play?mode=quick');
@@ -149,6 +165,7 @@ export default function HomePage() {
             e.stopPropagation();
             ensurePlay();
             if (!showSlider) {
+              playButtonSound();
               setShowSlider(true);
             } else {
               toggleMute(e);
@@ -177,6 +194,7 @@ export default function HomePage() {
               className="hp-volume-close-btn hp-pop-in"
               onClick={(e) => {
                 e.stopPropagation();
+                playButtonSound();
                 setShowSlider(false);
               }}
               title="Close Slider"
@@ -203,6 +221,7 @@ export default function HomePage() {
             className="hp-binder-container hp-pop-in hp-pop-delay-3" 
             onClick={(e) => {
               e.stopPropagation();
+              playButtonSound();
               setShowBinder(true);
             }}
           >
