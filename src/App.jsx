@@ -20,11 +20,12 @@ import CorruptionWheelModal from './components/CorruptionWheelModal';
 import GameFeedbackOverlay from './components/GameFeedbackOverlay';
 import HomePage from './components/HomePage';
 import GameMusic from './components/GameMusic';
+import DrawSoundEffects from './components/DrawSoundEffects';
 import { LayoutGroup } from 'framer-motion';
 import './App.css';
 
 function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
-  const { volume, changeVolume } = useGame();
+  const { volume, changeVolume, sfxVolume, changeSfxVolume } = useGame();
   const [previewCard, setPreviewCard] = useState(null);
   const [opponentScanning, setOpponentScanning] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -33,6 +34,11 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
     const saved = localStorage.getItem('musicVolume');
     const parsed = saved !== null ? parseFloat(saved) : 0.5;
     return parsed > 0 ? parsed : 0.5;
+  });
+  const [prevSfxVolume, setPrevSfxVolume] = useState(() => {
+    const saved = localStorage.getItem('sfxVolume');
+    const parsed = saved !== null ? parseFloat(saved) : 0.78;
+    return parsed > 0 ? parsed : 0.78;
   });
 
   const handleVolumeChange = (e) => {
@@ -49,6 +55,23 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
       changeVolume(0);
     } else {
       changeVolume(prevVolume);
+    }
+  };
+
+  const handleSfxVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    changeSfxVolume(newVolume);
+    if (newVolume > 0) {
+      setPrevSfxVolume(newVolume);
+    }
+  };
+
+  const toggleSfxMute = () => {
+    if (sfxVolume > 0) {
+      setPrevSfxVolume(sfxVolume);
+      changeSfxVolume(0);
+    } else {
+      changeSfxVolume(prevSfxVolume);
     }
   };
 
@@ -123,6 +146,28 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
                 className="gov-volume-slider"
               />
               <span className="settings-volume-pct">{Math.round(volume * 100)}%</span>
+            </div>
+
+            {/* SFX Volume Control */}
+            <div className="settings-row settings-row-panel">
+              <button 
+                onClick={toggleSfxMute}
+                className="settings-row-icon settings-mute-btn"
+                title={sfxVolume === 0 ? "Enable SFX" : "Mute SFX"}
+              >
+                {sfxVolume === 0 ? '🔇' : sfxVolume < 0.4 ? '🔉' : '🔊'}
+              </button>
+              <span className="settings-row-label">SFX</span>
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value={sfxVolume} 
+                onChange={handleSfxVolumeChange}
+                className="gov-volume-slider"
+              />
+              <span className="settings-volume-pct">{Math.round(sfxVolume * 100)}%</span>
             </div>
 
             {/* Divider */}
@@ -385,6 +430,7 @@ function GamePage() {
   return (
     <GameProvider dpThreshold={dpThreshold} onRestart={handleRestart}>
       <GameMusic />
+      <DrawSoundEffects />
       <div className={`game-container-wrapper ${isFullscreen ? 'fullscreen-mode' : ''}`} ref={wrapperRef} style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="game-container" ref={containerRef}>
           <GameBoard onToggleFullscreen={toggleFullscreen} isFullscreen={isFullscreen} onNavigateHome={handleNavigateHome} />

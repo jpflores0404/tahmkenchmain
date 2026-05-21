@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import CardComponent from './CardComponent';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function HandArea({ onSelectCard, dimmed = false }) {
   const { state, showToast, setDraggingCard, playSupport, dragToSlot } = useGame();
   const [hoveredId, setHoveredId] = useState(null);
+  const dealtCardIdsRef = useRef(new Set());
+
+  useEffect(() => {
+    state.hand.forEach((card) => dealtCardIdsRef.current.add(card.id));
+  }, [state.hand]);
 
   const handleCardClick = (card) => {
     onSelectCard && onSelectCard(card);
@@ -67,12 +72,14 @@ export default function HandArea({ onSelectCard, dimmed = false }) {
             // Cards sit at y=110 (half hidden), hovered card rises to y=-20 (fully visible)
             const restY = 110;
             const hoverY = -20;
+            const isNewCard = !dealtCardIdsRef.current.has(card.id);
+            const dealDelay = isNewCard ? (state.turnNumber === 1 ? i * 0.24 : 0.08) : 0;
 
             return (
             <motion.div 
               key={card.id} 
               // Initial state simulates coming from the player deck (up and to the right)
-              initial={{ opacity: 0, x: 500, y: -200, scale: 0.5, rotateZ: 25 }}
+              initial={{ opacity: 0, x: 520, y: -250, scale: 0.42, rotateZ: 28 }}
               animate={{ 
                 opacity: 1, 
                 x, 
@@ -83,9 +90,9 @@ export default function HandArea({ onSelectCard, dimmed = false }) {
               exit={{ opacity: 0, y: 200, scale: 0.8 }}
               transition={{ 
                 type: "spring", 
-                stiffness: isHovered ? 400 : 200, 
-                damping: isHovered ? 25 : 25,
-                delay: state.turnStarted ? 0 : i * 0.08
+                stiffness: isHovered ? 360 : 240, 
+                damping: isHovered ? 28 : 26,
+                delay: dealDelay
               }}
               className="hand-card-slot"
               onMouseEnter={() => {
@@ -103,7 +110,7 @@ export default function HandArea({ onSelectCard, dimmed = false }) {
               <motion.div
                 initial={{ rotateY: 180 }}
                 animate={{ rotateY: 0 }}
-                transition={{ type: "spring", stiffness: 120, damping: 20, delay: (i * 0.08) + 0.15 }}
+                transition={{ type: "spring", stiffness: 120, damping: 20, delay: dealDelay + 0.16 }}
                 style={{ transformStyle: 'preserve-3d', width: '100%', height: '100%' }}
                 className={isHovered ? 'hand-card-hover-glow' : ''}
               >

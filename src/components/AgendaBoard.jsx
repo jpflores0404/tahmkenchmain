@@ -1,13 +1,51 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import CardComponent from './CardComponent';
 
+const DROP_SOUND_SRC = '/sfx/card-drop.mp3';
+const DROP_SOUND_DURATION = 1000;
+
 export default function AgendaBoard({ isAI = false, onSelectCard }) {
-  const { state, dragToSlot, upgradeInfrastructure, playSupport, completeProject } = useGame();
+  const { state, dragToSlot, upgradeInfrastructure, playSupport, completeProject, sfxVolume } = useGame();
 
   const [dragOverSlot, setDragOverSlot] = useState(null);
+  const dropAudioRef = useRef(null);
+  const dropStopRef = useRef(null);
 
   const slots = isAI ? state.aiSlots : state.agendaSlots;
+
+  useEffect(() => {
+    return () => {
+      if (dropStopRef.current) clearTimeout(dropStopRef.current);
+      if (dropAudioRef.current) {
+        dropAudioRef.current.pause();
+        dropAudioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
+  const playDropSound = () => {
+    if (sfxVolume <= 0) return;
+
+    if (dropStopRef.current) clearTimeout(dropStopRef.current);
+    if (dropAudioRef.current) {
+      dropAudioRef.current.pause();
+      dropAudioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(DROP_SOUND_SRC);
+    audio.volume = Math.min(1, Math.max(0, sfxVolume));
+    dropAudioRef.current = audio;
+    audio.play().catch(() => {});
+
+    dropStopRef.current = setTimeout(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      if (dropAudioRef.current === audio) {
+        dropAudioRef.current = null;
+      }
+    }, DROP_SOUND_DURATION);
+  };
 
   const handleDragOver = (e, idx) => {
     if (isAI) return;
@@ -32,8 +70,10 @@ export default function AgendaBoard({ isAI = false, onSelectCard }) {
       
       if (cardData.type === 'infrastructure') {
         dragToSlot(cardData, idx);
+        playDropSound();
       } else if (cardData.type === 'support') {
         playSupport(cardData);
+        playDropSound();
       }
     } catch (err) {
       console.error('Drop error:', err);

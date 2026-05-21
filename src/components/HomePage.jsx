@@ -24,6 +24,17 @@ export default function HomePage() {
     }
   };
 
+  const primeDrawSound = () => {
+    const audio = new Audio('/sfx/card-draw.mp3');
+    audio.volume = 0;
+    audio.play()
+      .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     const playAudio = () => {
       if (audioRef.current) {
@@ -95,15 +106,20 @@ export default function HomePage() {
     e.stopPropagation();
     setShowOptions(true);
     handleInteraction();
+    primeDrawSound();
   };
 
   const handleNormalGame = (e) => {
     e.stopPropagation();
+    handleInteraction();
+    primeDrawSound();
     navigate('/play?mode=normal');
   };
 
   const handleQuickplay = (e) => {
     e.stopPropagation();
+    handleInteraction();
+    primeDrawSound();
     navigate('/play?mode=quick');
   };
 

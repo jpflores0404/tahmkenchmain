@@ -967,9 +967,19 @@ export function GameProvider({ children, dpThreshold = 5, onRestart }) {
     return saved !== null ? parseFloat(saved) : 0.5;
   });
 
+  const [sfxVolume, setSfxVolumeState] = useState(() => {
+    const saved = localStorage.getItem('sfxVolume');
+    return saved !== null ? parseFloat(saved) : 0.78;
+  });
+
   const changeVolume = (val) => {
     setVolumeState(val);
     localStorage.setItem('musicVolume', val);
+  };
+
+  const changeSfxVolume = (val) => {
+    setSfxVolumeState(val);
+    localStorage.setItem('sfxVolume', val);
   };
 
   const restart = () => {
@@ -988,6 +998,8 @@ export function GameProvider({ children, dpThreshold = 5, onRestart }) {
     toast,
     volume,
     changeVolume,
+    sfxVolume,
+    changeSfxVolume,
     startTurn,
     endTurn,
     restart,
