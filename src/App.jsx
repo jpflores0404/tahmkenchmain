@@ -92,13 +92,12 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
             {/* Divider */}
             <div className="settings-divider" />
 
-            {/* Fullscreen Toggle */}
+            {/* Resume */}
             <button 
-              onClick={onToggleFullscreen}
-              className="settings-row settings-row-btn"
+              onClick={() => setShowSettings(false)}
+              className="settings-resume-btn"
             >
-              <span className="settings-row-icon">{isFullscreen ? '🗗' : '🖵'}</span>
-              <span className="settings-row-label">{isFullscreen ? 'EXIT FULLSCREEN' : 'FULLSCREEN'}</span>
+              ▶ RESUME
             </button>
 
             {/* Divider */}
@@ -129,6 +128,18 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
             {/* Divider */}
             <div className="settings-divider" />
 
+            {/* Fullscreen Toggle */}
+            <button 
+              onClick={onToggleFullscreen}
+              className="settings-row settings-row-btn"
+            >
+              <span className="settings-row-icon">{isFullscreen ? '🗗' : '🖵'}</span>
+              <span className="settings-row-label">{isFullscreen ? 'EXIT FULLSCREEN' : 'FULLSCREEN'}</span>
+            </button>
+
+            {/* Divider */}
+            <div className="settings-divider" />
+
             {/* Main Menu */}
             <button 
               onClick={onNavigateHome}
@@ -136,17 +147,6 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
             >
               <span className="settings-row-icon"></span>
               <span className="settings-row-label">MAIN MENU</span>
-            </button>
-
-            {/* Divider */}
-            <div className="settings-divider" />
-
-            {/* Resume */}
-            <button 
-              onClick={() => setShowSettings(false)}
-              className="settings-resume-btn"
-            >
-              ▶ RESUME
             </button>
           </div>
         </div>
