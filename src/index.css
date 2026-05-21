@@ -1560,3 +1560,267 @@
     transform: rotate(2680deg);
   }
 }
+
+/* Custom Government Volume Slider Styles */
+.gov-volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 110px;
+  height: 8px;
+  background: rgba(143, 91, 43, 0.2);
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid rgba(143, 91, 43, 0.3);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.gov-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #8f5b2b;
+  border: 2px solid #faedcd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.gov-volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #a06733;
+}
+
+.gov-volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #8f5b2b;
+  border: 2px solid #faedcd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.gov-volume-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  background: #a06733;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SETTINGS GEAR BUTTON & OVERLAY PANEL
+   ═══════════════════════════════════════════════════════ */
+
+/* Gear Icon Button (Top-Right) */
+.settings-gear-btn {
+  font-size: 32px;
+  background: rgba(226, 186, 113, 0.85);
+  border: 2px solid #8f5b2b;
+  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+  outline: none;
+}
+.settings-gear-btn:hover {
+  transform: scale(1.1) rotate(30deg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  background: rgba(235, 198, 128, 0.95);
+}
+.settings-gear-btn:active {
+  transform: scale(0.95) rotate(15deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Full-screen Dark Overlay */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  animation: settingsFadeIn 0.2s ease-out;
+}
+
+/* Settings Panel Card */
+.settings-panel {
+  background: linear-gradient(180deg, #faedcd 0%, #e2ba71 100%);
+  border: 3px solid #8f5b2b;
+  border-radius: 16px;
+  padding: 28px 32px;
+  min-width: 380px;
+  max-width: 440px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: settingsSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Panel Header */
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+.settings-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: #4a3018;
+  letter-spacing: 0.15em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Divider Line */
+.settings-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #8f5b2b 20%, #8f5b2b 80%, transparent 100%);
+  opacity: 0.35;
+  margin: 4px 0;
+}
+
+/* Settings Row */
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 8px;
+  border-radius: 10px;
+  transition: background 150ms ease;
+}
+.settings-row-btn {
+  border: 2px solid #8f5b2b;
+  background: #e2ba71;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  outline: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.settings-row-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+  background: #ebc680;
+}
+.settings-row-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.settings-row-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+}
+.settings-row-label {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: bold;
+  color: #4a3018;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* Mute button inside settings */
+.settings-mute-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 150ms ease;
+}
+.settings-mute-btn:hover {
+  transform: scale(1.15);
+}
+.settings-mute-btn:active {
+  transform: scale(0.9);
+}
+
+/* Volume percentage text */
+.settings-volume-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: bold;
+  color: #4a3018;
+  min-width: 38px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Danger row (Main Menu) */
+.settings-row-danger .settings-row-label {
+  color: #4a3018;
+}
+.settings-row-danger:hover {
+  background: #ebc680;
+}
+.settings-row-danger:active {
+  background: #e2ba71;
+}
+
+/* Resume Button */
+.settings-resume-btn {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #5c9e31;
+  border: 2px solid #3b6e1b;
+  border-radius: 10px;
+  padding: 14px 24px;
+  margin-top: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  outline: none;
+}
+.settings-resume-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+  background: #6bc238;
+}
+.settings-resume-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes settingsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes settingsSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+

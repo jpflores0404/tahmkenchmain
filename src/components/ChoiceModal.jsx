@@ -76,7 +76,7 @@ export default function ChoiceModal() {
 
           {/* Budget row */}
           <div className="mt-4 flex justify-between items-center bg-black/25 border border-slate-700/40 rounded-xl p-2">
-            <span className="text-[11px] text-slate-300/60 uppercase tracking-widest" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-[11px] text-amber-200/90 uppercase tracking-widest" style={{ fontFamily: "var(--font-display)" }}>
               Available Budget
             </span>
             <span className="text-amber-300 font-black text-xl" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.08em" }}>

@@ -2,9 +2,16 @@ import { useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 
 export default function GameMusic() {
-  const { state } = useGame();
+  const { state, volume } = useGame();
   const audioRef = useRef(null);
   const hasStartedRef = useRef(false);
+
+  // Sync volume level
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   // Start music on first user interaction
   useEffect(() => {

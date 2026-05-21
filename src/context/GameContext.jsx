@@ -696,6 +696,16 @@ export function GameProvider({ children, dpThreshold = 5, onRestart }) {
     }, delay);
   }, []);
 
+  const [volume, setVolumeState] = useState(() => {
+    const saved = localStorage.getItem('musicVolume');
+    return saved !== null ? parseFloat(saved) : 0.5;
+  });
+
+  const changeVolume = (val) => {
+    setVolumeState(val);
+    localStorage.setItem('musicVolume', val);
+  };
+
   const restart = () => {
     if (aiThinkingRef.current) clearTimeout(aiThinkingRef.current);
     if (onRestart) {
@@ -710,6 +720,8 @@ export function GameProvider({ children, dpThreshold = 5, onRestart }) {
     dispatch,
     showToast,
     toast,
+    volume,
+    changeVolume,
     startTurn,
     endTurn,
     restart,
