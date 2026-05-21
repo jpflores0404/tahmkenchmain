@@ -1703,6 +1703,12 @@
   border-radius: 10px;
   transition: background 150ms ease;
 }
+.settings-row-panel {
+  border: 2px solid #8f5b2b;
+  background: #e2ba71;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+}
 .settings-row-btn {
   border: 2px solid #8f5b2b;
   background: #e2ba71;

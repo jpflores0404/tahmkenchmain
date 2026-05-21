@@ -104,7 +104,7 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
             <div className="settings-divider" />
 
             {/* Volume Control */}
-            <div className="settings-row">
+            <div className="settings-row settings-row-panel">
               <button 
                 onClick={toggleMute}
                 className="settings-row-icon settings-mute-btn"
