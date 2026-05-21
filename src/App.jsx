@@ -156,16 +156,16 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
       <div />
 
       {/* ═══════ MIDDLE-CENTER: ARENA (the red-line area) ═══════ */}
-      <div className="flex flex-col items-center justify-center pt-32 pb-4 gap-1 min-h-0 overflow-visible relative">
+      <div className="flex flex-col items-center justify-center pt-32 pb-4 gap-1 min-h-0 overflow-visible relative translate-y-10">
         {/* Opponent Chibi */}
-        <div className="flex flex-col items-center justify-center relative z-10">
+        <div className="flex flex-col items-center justify-center relative z-10 -translate-y-2">
+          <p className="text-[12px] text-slate-800 font-bold mb-0.5 tracking-widest drop-shadow-md">OPPONENT</p>
           <img 
             src="/ai_character.gif" 
             alt="A.I. Opponent" 
             className="w-10 h-auto drop-shadow-[0_6px_8px_rgba(0,0,0,0.6)] transition-transform hover:scale-105" 
             style={{ imageRendering: 'pixelated' }} 
           />
-          <p className="text-[8px] text-slate-800 font-bold mt-0.5 tracking-widest drop-shadow-md">OPPONENT</p>
         </div>
 
         {/* AI Agenda Slots & Deck */}
@@ -198,14 +198,14 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
         </div>
 
         {/* Player Chibi */}
-        <div className="mt-2 flex flex-col items-center justify-center">
+        <div className="mt-2 flex flex-col items-center justify-center translate-y-3">
           <img 
             src="/player_character.gif" 
             alt="Player Character" 
             className="w-8 h-auto drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transition-transform hover:scale-105" 
             style={{ imageRendering: 'pixelated' }} 
           />
-          <p className="text-[8px] text-slate-800 font-bold mt-0.5 tracking-widest drop-shadow-md">PLAYER</p>
+          <p className="text-[12px] text-slate-800 font-bold mt-0.5 tracking-widest drop-shadow-md">PLAYER</p>
         </div>
       </div>
 
