@@ -223,6 +223,77 @@
   pointer-events: none;
 }
 
+/* ═══════════════════════════════════════════════════════
+   OPPONENT HAND — hidden card backs above the arena
+   ═══════════════════════════════════════════════════════ */
+
+.opponent-hand {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 1px;
+  height: 172px;
+  transform: translateX(-50%);
+  z-index: 80;
+  pointer-events: none;
+}
+
+.opponent-hand-card {
+  position: absolute;
+  top: 0;
+  left: -48px;
+  width: 96px;
+  aspect-ratio: 330 / 539;
+  border: 3px solid #6f421c;
+  border-radius: 8px;
+  background: #c98f3f;
+  background-image:
+    linear-gradient(90deg, rgba(255, 224, 154, 0.24), transparent 15%, transparent 82%, rgba(89, 48, 18, 0.18)),
+    linear-gradient(180deg, rgba(247, 191, 98, 0.82), rgba(178, 111, 41, 0.96)),
+    repeating-linear-gradient(90deg, rgba(91, 53, 23, 0.16) 0 2px, transparent 2px 13px);
+  background-size: 100% 100%, 100% 100%, 13px 100%;
+  box-shadow:
+    0 13px 0 rgba(76, 43, 18, 0.86),
+    0 18px 18px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 2px rgba(255, 218, 143, 0.28),
+    inset 5px 0 0 rgba(245, 182, 85, 0.52),
+    inset -5px 0 0 rgba(90, 49, 20, 0.2);
+  transform-origin: 50% 10%;
+}
+
+.opponent-hand-card::before {
+  content: "";
+  position: absolute;
+  inset: 8px 9px;
+  border-radius: 5px;
+  border: 2px solid rgba(98, 57, 24, 0.48);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 221, 153, 0.2),
+    0 0 0 1px rgba(255, 226, 163, 0.08);
+}
+
+.opponent-hand-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 10px 8px;
+  height: 12px;
+  border-radius: 0 0 5px 5px;
+  background: linear-gradient(180deg, rgba(129, 73, 27, 0.2), rgba(63, 35, 15, 0.28));
+  opacity: 0.8;
+}
+
+.opponent-hand-card-inner {
+  position: absolute;
+  inset: 13px 15px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(90deg, rgba(83, 48, 21, 0.17) 0 2px, transparent 2px 11px),
+    linear-gradient(180deg, rgba(249, 195, 100, 0.22), rgba(106, 62, 25, 0.06));
+  border: 1px solid rgba(92, 53, 22, 0.16);
+  box-shadow: inset 0 0 16px rgba(122, 71, 28, 0.08);
+  pointer-events: none;
+}
+
 .gov-card-stamp {
   position: absolute;
   inset: 0;
@@ -1421,29 +1492,49 @@
    SUPPORT CARD LOG — Right-side indicator
    ═══════════════════════════════════════════════════════ */
 
+.support-log-anchor {
+  position: absolute;
+  top: 120px;
+  right: 22px;
+  bottom: 210px;
+  z-index: 120;
+  width: 330px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
 .support-log-panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  max-width: 380px;
+  gap: 10px;
+  max-height: 100%;
+  max-width: 330px;
   width: 100%;
+  overflow: hidden auto;
+  padding-right: 4px;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(143, 91, 43, 0.45) rgba(250, 237, 205, 0.28);
 }
 
 .support-log-section {
-  border-radius: 10px;
-  border: 3px solid rgba(143, 91, 43, 0.5);
-  background: rgba(250, 237, 205, 0.92);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 2px solid rgba(143, 91, 43, 0.55);
+  background: rgba(250, 237, 205, 0.88);
+  box-shadow: 0 8px 18px rgba(42, 28, 14, 0.22);
   overflow: hidden;
+  backdrop-filter: blur(2px);
 }
 
 .support-log-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 14px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   font-weight: bold;
@@ -1459,12 +1550,12 @@
 }
 
 .support-log-icon {
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1;
 }
 
 .support-log-card {
-  padding: 10px 14px;
+  padding: 8px 12px 9px;
   border-bottom: 1px dashed rgba(143, 91, 43, 0.15);
 }
 .support-log-card:last-child {
@@ -1473,18 +1564,27 @@
 
 .support-log-card-name {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: bold;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: #4a3018;
 }
 
 .support-log-card-desc {
-  margin-top: 4px;
+  margin-top: 3px;
   font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.35;
   color: #643c14;
+}
+
+@media (max-width: 900px) {
+  .support-log-anchor {
+    top: 96px;
+    right: 12px;
+    bottom: 190px;
+    width: 280px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1829,4 +1929,3 @@
     transform: scale(1) translateY(0);
   }
 }
-

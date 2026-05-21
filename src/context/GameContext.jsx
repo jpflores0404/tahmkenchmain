@@ -48,6 +48,25 @@ function getHonestDpBonus(state, card) {
   return bonus;
 }
 
+function getAiHonestDpBonus(state, card) {
+  let bonus = 0;
+  if (state.aiHumanCapitalActive && (card.name === 'Public Hospital' || card.name === 'Public School')) bonus += 1;
+  if (state.aiGreenSubsidyActive && ['Power Grid', 'Water Facility', 'Transit System'].includes(card.name)) bonus += 1;
+  return bonus;
+}
+
+function getHonestBuildCost(card, discount = 0) {
+  return Math.max(0, (card.honestCost || 3) - (discount > 0 ? 1 : 0));
+}
+
+function countCutCornersBuilds(slots) {
+  return slots.filter(slot => slot && slot.status === 'built' && slot.buildType === 'corrupt').length;
+}
+
+function getCorruptionTurnPenalty(isCorrupted) {
+  return isCorrupted ? 1 : 0;
+}
+
 function completeBuild(state, card, buildType, slotIndex, actor = 'player') {
   const slotsKey = actor === 'player' ? 'agendaSlots' : 'aiSlots';
   const dpKey = actor === 'player' ? 'developmentPoints' : 'aiDP';
@@ -67,7 +86,7 @@ function completeBuild(state, card, buildType, slotIndex, actor = 'player') {
   };
 
   if (buildType === 'honest') {
-    const bonus = actor === 'player' ? getHonestDpBonus(state, card) : 0;
+    const bonus = actor === 'player' ? getHonestDpBonus(state, card) : getAiHonestDpBonus(state, card);
     slots[slotIndex] = { ...baseCard, status: 'built', buildType, timer: null };
     dp += 1 + bonus;
     effects = `${card.name} built honestly. DP +${1 + bonus}.`;
@@ -91,6 +110,9 @@ function completeBuild(state, card, buildType, slotIndex, actor = 'player') {
     [corruptedKey]: becameCorrupted,
     [corruptedAtKey]: corruptedAtTurn,
     lastBuildResult: actor === 'player' ? { success: true, effects } : state.lastBuildResult,
+    turnSupportLog: actor === 'player'
+      ? [...state.turnSupportLog, { name: card.name, description: effects }]
+      : state.turnSupportLog,
   };
 }
 
@@ -107,10 +129,10 @@ function checkGameOver(state) {
     gameResult = 'defeat_impeachment';
   } else if (state.aiTrust <= 0) {
     phase = 'gameover';
-    gameResult = 'victory';
+    gameResult = 'victory_impeachment';
   } else if (state.aiDP >= state.dpWinThreshold) {
     phase = 'gameover';
-    gameResult = 'defeat_termlimit';
+    gameResult = 'defeat_development';
   }
 
   return { ...state, phase, gameResult };
@@ -154,9 +176,13 @@ function createInitialState(dpThreshold = 5) {
     aiDeck: createAIDeck(),
     aiHand: [],
     aiDrawCounters: { autoCleanDrawn: 0, investigationDrawn: 0, economicBoomDrawn: 0 },
+    aiNextHonestDiscount: 0,
+    aiHumanCapitalActive: false,
+    aiGreenSubsidyActive: false,
     aiThinking: false,
     turnSupportLog: [],
     aiTurnSupportLog: [],
+    aiInvestigationResult: null,
     playedSupportCardsThisTurn: [],
   };
 }
@@ -238,6 +264,38 @@ function advanceBayanihan(slots, dp) {
   return { slots: nextSlots, dp: nextDp };
 }
 
+function chooseAiInfrastructureCard(cards, state) {
+  return [...cards].sort((a, b) => {
+    const aBonus = getAiHonestDpBonus(state, a);
+    const bBonus = getAiHonestDpBonus(state, b);
+    if (aBonus !== bBonus) return bBonus - aBonus;
+    return a.name.localeCompare(b.name);
+  })[0];
+}
+
+function chooseAiBuildType({ card, aiBudget, aiDP, aiTrust, aiCorrupted, aiNextHonestDiscount, playerDP, dpWinThreshold, honestDp }) {
+  const honestCost = getHonestBuildCost(card, aiNextHonestDiscount);
+  const corruptCost = card.corruptCost || 1;
+  const corruptDp = 1;
+  const isBehind = aiDP < playerDP;
+  const canWinHonestly = aiDP + honestDp >= dpWinThreshold && aiBudget >= honestCost;
+  const canWinCorruptly = aiDP + corruptDp >= dpWinThreshold && aiBudget >= corruptCost;
+
+  if (canWinHonestly) return 'honest';
+  if (!aiCorrupted && canWinCorruptly) return 'corrupt';
+
+  if (aiCorrupted) {
+    if (aiTrust <= 2 && aiDP + honestDp < dpWinThreshold) return null;
+    if (aiBudget >= honestCost && (aiTrust >= 4 || isBehind)) return 'honest';
+    if (aiBudget >= corruptCost && aiTrust >= 4 && isBehind) return 'corrupt';
+    return aiTrust >= 3 ? 'bayanihan' : null;
+  }
+
+  if (aiBudget >= honestCost) return 'honest';
+  if (aiBudget >= corruptCost && (isBehind || aiTrust >= 4)) return 'corrupt';
+  return 'bayanihan';
+}
+
 function runAiTurn(state) {
   let aiBudget = Math.min(10, state.aiBudget + 3);
   let aiTrust = state.aiTrust;
@@ -246,10 +304,29 @@ function runAiTurn(state) {
   let aiSlots = [...state.aiSlots];
   let aiCorrupted = state.aiCorrupted;
   let aiCorruptedAtTurn = state.aiCorruptedAtTurn;
+  let aiNextHonestDiscount = state.aiNextHonestDiscount;
+  let aiHumanCapitalActive = state.aiHumanCapitalActive;
+  let aiGreenSubsidyActive = state.aiGreenSubsidyActive;
   let playerTrust = state.publicTrust;
   let aiDeck = [...state.aiDeck];
   let aiDrawCounters = { ...state.aiDrawCounters };
+  let aiInvestigationResult = null;
   const aiSupportLog = [];
+  const playerPenaltyLog = [];
+
+  const getPlayerTurnSupportLog = () => (
+    playerPenaltyLog.length > 0 ? [...state.turnSupportLog, ...playerPenaltyLog] : state.turnSupportLog
+  );
+
+  const removeAiCard = (card) => {
+    aiHand = aiHand.filter(handCard => handCard.id !== card.id);
+  };
+
+  const playAiSupportCard = (card, description = card.description) => {
+    if (card.cost > 0) aiBudget -= card.cost;
+    removeAiCard(card);
+    aiSupportLog.push({ name: card.name, description });
+  };
 
   if (state.turnNumber >= 2) {
     const drawn = drawCards(aiDeck, aiHand, 1, aiDrawCounters, 'ai');
@@ -259,38 +336,157 @@ function runAiTurn(state) {
   }
 
   if (aiCorrupted) {
-    aiTrust = Math.max(0, aiTrust - 1);
-    aiBudget = Math.max(0, aiBudget - 1);
+    const aiCorruptionPenalty = getCorruptionTurnPenalty(aiCorrupted);
+    aiTrust = Math.max(0, aiTrust - aiCorruptionPenalty);
+    aiBudget = Math.max(0, aiBudget - aiCorruptionPenalty);
   }
 
-  for (let i = aiHand.length - 1; i >= 0; i -= 1) {
-    const card = aiHand[i];
-    if (card.type !== 'support') continue;
-    if (card.cost > 0 && aiBudget < card.cost) continue;
+  if (aiTrust <= 0) {
+    return {
+      ...state,
+      aiBudget,
+      aiTrust,
+      aiDP,
+      aiHand,
+      aiSlots,
+      aiCorrupted,
+      aiCorruptedAtTurn,
+      aiDeck,
+      aiDrawCounters,
+      aiNextHonestDiscount,
+      aiHumanCapitalActive,
+      aiGreenSubsidyActive,
+      aiInvestigationResult,
+      turnSupportLog: getPlayerTurnSupportLog(),
+      aiTurnSupportLog: aiSupportLog,
+    };
+  }
 
-    if (card.effect === 'auto_clean' && aiCorrupted && state.turnNumber >= (aiCorruptedAtTurn + 2)) {
+  const getSupport = (effect) => aiHand.find(card => card.type === 'support' && card.effect === effect);
+  const hasInfraInHand = () => aiHand.some(card => card.type === 'infrastructure');
+
+  let supportPlayed = true;
+  while (supportPlayed) {
+    supportPlayed = false;
+
+    const autoClean = getSupport('auto_clean');
+    if (autoClean && aiCorrupted && state.turnNumber >= (aiCorruptedAtTurn + 2) && (aiTrust <= 3 || aiBudget >= 4)) {
       aiCorrupted = false;
       aiCorruptedAtTurn = null;
-      aiHand.splice(i, 1);
-      aiSupportLog.push({ name: card.name, description: 'AI removed its Corrupted status.' });
-    } else if (card.effect === 'investigation' && Math.random() < 0.5) {
-      if (state.isCorrupted) {
-        aiBudget += 3;
-        playerTrust = Math.max(0, playerTrust - 2);
-      }
-      aiHand.splice(i, 1);
-      aiSupportLog.push({ name: card.name, description: 'AI ran an internal corruption investigation.' });
-    } else if (card.effect === 'budget_boost') {
-      aiBudget += card.value || 2;
-      aiHand.splice(i, 1);
-      aiSupportLog.push({ name: card.name, description: card.description });
-    } else if (card.effect === 'human_capital_passive' || card.effect === 'green_subsidy_passive' || card.effect === 'honest_discount') {
-      if (Math.random() < 0.35) {
-        if (card.cost > 0) aiBudget -= card.cost;
-        aiHand.splice(i, 1);
-        aiSupportLog.push({ name: card.name, description: card.description });
+      playAiSupportCard(autoClean, 'AI removed its Corrupted status.');
+      supportPlayed = true;
+      continue;
+    }
+
+    const investigation = getSupport('investigation');
+    const playerCorruptBuilds = countCutCornersBuilds(state.agendaSlots);
+    const investigationChance = 0.35;
+    if (investigation && state.isCorrupted && playerCorruptBuilds > 0 && Math.random() < investigationChance) {
+      playerTrust = Math.max(0, playerTrust - 2);
+      aiInvestigationResult = {
+        effects: 'AI used Investigation: you were Corrupted, so you lost 2 Trust points.',
+      };
+      playAiSupportCard(investigation, aiInvestigationResult.effects);
+      playerPenaltyLog.push({
+        name: 'Trust Penalty',
+        description: 'AI Investigation found your corruption. Trust -2.',
+      });
+      supportPlayed = true;
+      if (playerTrust <= 0) break;
+      continue;
+    }
+
+    const economicBoom = getSupport('budget_boost');
+    const upgradableIdx = aiSlots.findIndex(slot => slot && slot.status === 'built' && !slot.upgraded);
+    const canUseBoom = economicBoom && aiBudget < 10 && (
+      aiBudget < 3 ||
+      (upgradableIdx !== -1 && aiBudget < UPGRADE_COST && aiBudget + (economicBoom.value || 2) >= UPGRADE_COST) ||
+      (hasInfraInHand() && aiBudget < 3 && aiBudget + (economicBoom.value || 2) >= 3)
+    );
+    if (canUseBoom) {
+      aiBudget += economicBoom.value || 2;
+      playAiSupportCard(economicBoom);
+      supportPlayed = true;
+      continue;
+    }
+
+    const humanCapital = getSupport('human_capital_passive');
+    if (humanCapital && !aiHumanCapitalActive && aiBudget >= humanCapital.cost) {
+      const hasRelevantInfra = aiHand.some(card => card.type === 'infrastructure' && (card.name === 'Public Hospital' || card.name === 'Public School'));
+      const retroDp = aiSlots.filter(slot => slot && slot.status === 'built' && slot.buildType === 'honest' && (slot.name === 'Public Hospital' || slot.name === 'Public School')).length;
+      if (hasRelevantInfra || retroDp > 0) {
+        aiHumanCapitalActive = true;
+        aiDP += retroDp;
+        playAiSupportCard(humanCapital, retroDp > 0 ? `${humanCapital.description} AI gained +${retroDp} retroactive DP.` : humanCapital.description);
+        supportPlayed = true;
+        continue;
       }
     }
+
+    const greenSubsidy = getSupport('green_subsidy_passive');
+    if (greenSubsidy && !aiGreenSubsidyActive && aiBudget >= greenSubsidy.cost) {
+      const greenNames = ['Power Grid', 'Water Facility', 'Transit System'];
+      const hasRelevantInfra = aiHand.some(card => card.type === 'infrastructure' && greenNames.includes(card.name));
+      const retroDp = aiSlots.filter(slot => slot && slot.status === 'built' && slot.buildType === 'honest' && greenNames.includes(slot.name)).length;
+      if (hasRelevantInfra || retroDp > 0) {
+        aiGreenSubsidyActive = true;
+        aiDP += retroDp;
+        playAiSupportCard(greenSubsidy, retroDp > 0 ? `${greenSubsidy.description} AI gained +${retroDp} retroactive DP.` : greenSubsidy.description);
+        supportPlayed = true;
+        continue;
+      }
+    }
+
+    const honestDiscount = getSupport('honest_discount');
+    if (honestDiscount && hasInfraInHand() && aiNextHonestDiscount === 0 && aiBudget >= 2) {
+      aiNextHonestDiscount += 1;
+      playAiSupportCard(honestDiscount);
+      supportPlayed = true;
+    }
+  }
+
+  if (playerTrust <= 0) {
+    return {
+      ...state,
+      publicTrust: playerTrust,
+      aiBudget: Math.min(10, aiBudget),
+      aiTrust,
+      aiDP,
+      aiHand,
+      aiSlots,
+      aiCorrupted,
+      aiCorruptedAtTurn,
+      aiDeck,
+      aiDrawCounters,
+      aiNextHonestDiscount,
+      aiHumanCapitalActive,
+      aiGreenSubsidyActive,
+      aiInvestigationResult,
+      turnSupportLog: getPlayerTurnSupportLog(),
+      aiTurnSupportLog: aiSupportLog,
+    };
+  }
+
+  if (aiDP >= state.dpWinThreshold) {
+    return {
+      ...state,
+      publicTrust: playerTrust,
+      aiBudget: Math.min(10, aiBudget),
+      aiTrust,
+      aiDP,
+      aiHand,
+      aiSlots,
+      aiCorrupted,
+      aiCorruptedAtTurn,
+      aiDeck,
+      aiDrawCounters,
+      aiNextHonestDiscount,
+      aiHumanCapitalActive,
+      aiGreenSubsidyActive,
+      aiInvestigationResult,
+      turnSupportLog: getPlayerTurnSupportLog(),
+      aiTurnSupportLog: aiSupportLog,
+    };
   }
 
   // Cap AI budget at 10 after support card resolutions
@@ -309,42 +505,70 @@ function runAiTurn(state) {
   const infraCards = aiHand.filter(card => card.type === 'infrastructure');
 
   if (emptySlot !== -1 && infraCards.length > 0) {
-    const card = infraCards[Math.floor(Math.random() * infraCards.length)];
-    const strategies = [
-      { type: 'honest', weight: 45, cost: card.honestCost || 3 },
-      { type: 'corrupt', weight: 30, cost: card.corruptCost || 1 },
-      { type: 'bayanihan', weight: 25, cost: 0 },
-    ];
-    const affordable = strategies.filter(strategy => aiBudget >= strategy.cost);
-    const totalWeight = affordable.reduce((sum, strategy) => sum + strategy.weight, 0);
-    let roll = Math.random() * totalWeight;
-    let chosen = affordable[affordable.length - 1];
+    const card = chooseAiInfrastructureCard(infraCards, {
+      ...state,
+      aiHumanCapitalActive,
+      aiGreenSubsidyActive,
+    });
+    const chosen = chooseAiBuildType({
+      card,
+      aiBudget,
+      aiDP,
+      aiTrust,
+      aiCorrupted,
+      aiNextHonestDiscount,
+      playerDP: state.developmentPoints,
+      dpWinThreshold: state.dpWinThreshold,
+      honestDp: 1 + getAiHonestDpBonus({ ...state, aiHumanCapitalActive, aiGreenSubsidyActive }, card),
+    });
 
-    for (const strategy of affordable) {
-      roll -= strategy.weight;
-      if (roll <= 0) {
-        chosen = strategy;
-        break;
+    if (chosen) {
+      const buildCost = chosen === 'honest' ? getHonestBuildCost(card, aiNextHonestDiscount) : chosen === 'corrupt' ? card.corruptCost || 1 : 0;
+      aiBudget -= buildCost;
+      if (chosen === 'honest' && aiNextHonestDiscount > 0) {
+        aiNextHonestDiscount -= 1;
+      }
+      aiHand = aiHand.filter(handCard => handCard.id !== card.id);
+
+      const wheelPassed = !aiCorrupted || Math.random() >= 0.7;
+      if (wheelPassed) {
+        const builtState = completeBuild(
+          { ...state, aiSlots, aiDP, aiCorrupted, aiCorruptedAtTurn, aiHumanCapitalActive, aiGreenSubsidyActive },
+          card,
+          chosen,
+          emptySlot,
+          'ai',
+        );
+        aiSlots = builtState.aiSlots;
+        aiDP = builtState.aiDP;
+        aiCorrupted = builtState.aiCorrupted;
+        aiCorruptedAtTurn = builtState.aiCorruptedAtTurn;
+      } else {
+        aiSupportLog.push({ name: card.name, description: 'AI attempted a build while Corrupted, but the project failed.' });
       }
     }
+  }
 
-    aiBudget -= chosen.cost;
-    aiHand = aiHand.filter(handCard => handCard.id !== card.id);
-
-    const wheelPassed = !aiCorrupted || Math.random() >= 0.7;
-    if (wheelPassed) {
-      const builtState = completeBuild(
-        { ...state, aiSlots, aiDP, aiCorrupted, aiCorruptedAtTurn },
-        card,
-        chosen.type,
-        emptySlot,
-        'ai',
-      );
-      aiSlots = builtState.aiSlots;
-      aiDP = builtState.aiDP;
-      aiCorrupted = builtState.aiCorrupted;
-      aiCorruptedAtTurn = builtState.aiCorruptedAtTurn;
-    }
+  if (aiDP >= state.dpWinThreshold) {
+    return {
+      ...state,
+      publicTrust: playerTrust,
+      aiBudget: Math.min(10, aiBudget),
+      aiTrust,
+      aiDP,
+      aiHand,
+      aiSlots,
+      aiCorrupted,
+      aiCorruptedAtTurn,
+      aiDeck,
+      aiDrawCounters,
+      aiNextHonestDiscount,
+      aiHumanCapitalActive,
+      aiGreenSubsidyActive,
+      aiInvestigationResult,
+      turnSupportLog: getPlayerTurnSupportLog(),
+      aiTurnSupportLog: aiSupportLog,
+    };
   }
 
   // AI Upgrade: Prioritize if slots are full and budget allows, otherwise check 25% random chance
@@ -353,7 +577,9 @@ function runAiTurn(state) {
   const isBuilding = aiSlots.some(slot => slot && slot.status === 'building');
 
   if (upgradableIdx !== -1 && aiBudget >= UPGRADE_COST) {
-    if (slotsFull || (!isBuilding && Math.random() < 0.25)) {
+    const upgradeWins = aiDP + UPGRADE_DP_REWARD >= state.dpWinThreshold;
+    const playerNearWin = state.developmentPoints >= state.dpWinThreshold - 1;
+    if (upgradeWins || slotsFull || playerNearWin || (!isBuilding && aiBudget >= 9)) {
       aiSlots[upgradableIdx] = {
         ...aiSlots[upgradableIdx],
         upgraded: true,
@@ -363,6 +589,28 @@ function runAiTurn(state) {
       aiDP += UPGRADE_DP_REWARD;
       aiSupportLog.push({ name: aiSlots[upgradableIdx].name, description: 'AI upgraded an infrastructure project.' });
     }
+  }
+
+  if (aiDP >= state.dpWinThreshold) {
+    return {
+      ...state,
+      publicTrust: playerTrust,
+      aiBudget: Math.min(10, aiBudget),
+      aiTrust,
+      aiDP,
+      aiHand,
+      aiSlots,
+      aiCorrupted,
+      aiCorruptedAtTurn,
+      aiDeck,
+      aiDrawCounters,
+      aiNextHonestDiscount,
+      aiHumanCapitalActive,
+      aiGreenSubsidyActive,
+      aiInvestigationResult,
+      turnSupportLog: getPlayerTurnSupportLog(),
+      aiTurnSupportLog: aiSupportLog,
+    };
   }
 
   const aiProgress = advanceBayanihan(aiSlots, aiDP);
@@ -381,6 +629,11 @@ function runAiTurn(state) {
     aiCorruptedAtTurn,
     aiDeck,
     aiDrawCounters,
+    aiNextHonestDiscount,
+    aiHumanCapitalActive,
+    aiGreenSubsidyActive,
+    aiInvestigationResult,
+    turnSupportLog: getPlayerTurnSupportLog(),
     aiTurnSupportLog: aiSupportLog,
   };
 }
@@ -416,8 +669,9 @@ function gameReducer(state, action) {
         aiDrawCounters = aiDraw.counters;
       }
 
-      const corruptedTrust = state.isCorrupted ? Math.max(0, state.publicTrust - 1) : state.publicTrust;
-      const corruptedBudget = Math.min(10, state.isCorrupted ? Math.max(0, state.budget + 3 - 1) : state.budget + 3);
+      const corruptionPenalty = getCorruptionTurnPenalty(state.isCorrupted);
+      const corruptedTrust = Math.max(0, state.publicTrust - corruptionPenalty);
+      const corruptedBudget = Math.min(10, Math.max(0, state.budget + 3 - corruptionPenalty));
 
       return checkGameOver({
         ...state,
@@ -430,11 +684,10 @@ function gameReducer(state, action) {
         publicTrust: corruptedTrust,
         budget: corruptedBudget,
         turnStarted: true,
-        turnSupportLog: [],
-        aiTurnSupportLog: [],
         playedSupportCardsThisTurn: [],
         corruptionWheelResult: null,
         investigationResult: null,
+        aiInvestigationResult: null,
         autoCleanResult: null,
         lastBuildResult: null,
       });
@@ -460,17 +713,21 @@ function gameReducer(state, action) {
       const { card, buildType, slotIndex } = state.pendingBuild;
 
       if (!success) {
-        return checkGameOver({
-          ...state,
-          phase: 'play',
-          pendingBuild: null,
-          precalcWheelSuccess: null,
-          precalcWheelAngle: null,
-          corruptionWheelResult: {
-            success: false,
-            effects: `Build failed. ${card.name} was not completed, the paid Budget is lost, and no DP was gained.`,
-          },
-        });
+      return checkGameOver({
+        ...state,
+        phase: 'play',
+        pendingBuild: null,
+        precalcWheelSuccess: null,
+        precalcWheelAngle: null,
+        corruptionWheelResult: {
+          success: false,
+          effects: `Build failed. ${card.name} was not completed, the paid Budget is lost, and no DP was gained.`,
+        },
+        turnSupportLog: [
+          ...state.turnSupportLog,
+          { name: card.name, description: `Build failed. ${card.name} was not completed, the paid Budget is lost, and no DP was gained.` },
+        ],
+      });
       }
 
       const built = completeBuild(state, card, buildType, slotIndex, 'player');
@@ -506,6 +763,10 @@ function gameReducer(state, action) {
         agendaSlots: slots,
         developmentPoints: state.developmentPoints + UPGRADE_DP_REWARD,
         lastBuildResult: { success: true, effects: `${current.name} upgraded. DP +${UPGRADE_DP_REWARD}.` },
+        turnSupportLog: [
+          ...state.turnSupportLog,
+          { name: current.name, description: `${current.name} upgraded. DP +${UPGRADE_DP_REWARD}.` },
+        ],
       });
     }
 
@@ -513,6 +774,7 @@ function gameReducer(state, action) {
       if (state.phase !== 'play' || !state.turnStarted) return state;
       const { card } = action.payload;
       if (card.type !== 'support') return state;
+      if (card.effect === 'investigation' && state.playedSupportCardsThisTurn?.includes('investigation')) return state;
       if (card.cost > 0 && state.budget < card.cost) return state;
 
       let budget = state.budget - (card.cost || 0);
@@ -619,6 +881,9 @@ function gameReducer(state, action) {
         developmentPoints: playerProgress.dp,
       };
 
+      nextState = checkGameOver(nextState);
+      if (nextState.phase === 'gameover') return nextState;
+
       nextState = runAiTurn(nextState);
       nextState = {
         ...nextState,
@@ -679,7 +944,8 @@ export function GameProvider({ children, dpThreshold = 5, onRestart }) {
     if (state.hand.length >= 12) {
       showToast('Hand is full (12/12)! No card drawn.', 'error');
     }
-    const income = state.isCorrupted ? 2 : 3;
+    const corruptionPenalty = getCorruptionTurnPenalty(state.isCorrupted);
+    const income = Math.max(0, 3 - corruptionPenalty);
     if (state.budget + income > 10) {
       showToast('Budget capped at maximum of 10!', 'info');
     }
@@ -744,6 +1010,11 @@ export function GameProvider({ children, dpThreshold = 5, onRestart }) {
           showToast(`You must wait 2 turns after being Corrupted to use Auto Clean. (Available on turn ${state.corruptedAtTurn + 2})`);
           return;
         }
+      }
+
+      if (card.effect === 'investigation' && state.playedSupportCardsThisTurn?.includes('investigation')) {
+        showToast('You can only use Investigation once per turn.');
+        return;
       }
 
       if (state.playedSupportCardsThisTurn && state.playedSupportCardsThisTurn.includes(card.effect)) {

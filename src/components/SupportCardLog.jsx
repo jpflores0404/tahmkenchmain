@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../context/GameContext';
 
@@ -10,49 +9,17 @@ export default function SupportCardLog() {
   const hasAiCards = aiTurnSupportLog.length > 0;
   const hasCards = hasPlayerCards || hasAiCards;
 
-  const [visible, setVisible] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const timerRef = useRef(null);
-
-  // Reset visibility & timer whenever cards change
-  useEffect(() => {
-    if (hasCards) {
-      setVisible(true);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        if (!hovered) setVisible(false);
-      }, 15000);
-    } else {
-      setVisible(false);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [turnSupportLog, aiTurnSupportLog, hasCards]);
-
-  // Pause timer on hover, restart on unhover
-  useEffect(() => {
-    if (hovered) {
-      clearTimeout(timerRef.current);
-    } else if (visible && hasCards) {
-      timerRef.current = setTimeout(() => {
-        setVisible(false);
-      }, 15000);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [hovered]);
-
   if (!hasCards) return null;
 
   return (
     <AnimatePresence>
-      {visible && (
+      {hasCards && (
         <motion.div
           className="support-log-panel"
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 30 }}
           transition={{ duration: 0.6 }}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
         >
           {/* AI Support Cards */}
           <AnimatePresence>

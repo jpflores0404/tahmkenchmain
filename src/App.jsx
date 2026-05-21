@@ -210,7 +210,7 @@ function GameBoard({ onToggleFullscreen, isFullscreen, onNavigateHome }) {
       </div>
 
       {/* ═══════ MIDDLE-RIGHT: Support Log ═══════ */}
-      <div className="flex flex-col items-end justify-center px-4 gap-4 relative" style={{ pointerEvents: 'none' }}>
+      <div className="support-log-anchor">
         <SupportCardLog />
       </div>
 

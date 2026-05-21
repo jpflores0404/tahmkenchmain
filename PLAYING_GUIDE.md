@@ -59,7 +59,7 @@ Choosing to **Cut Corners** saves budget but marks you as **Corrupted**.
 
 ### The Cost of Corruption
 Every turn you start while Corrupted, you suffer:
-*   **-1 Budget** (reducing your turn income to +2 Budget)
+*   **-1 Budget**
 *   **-1 Public Trust** (which will eventually lead to impeachment if not cleared)
 
 ### The Corruption Wheel (Risk of Build Failure)
@@ -100,6 +100,7 @@ Cards are drawn from a weighted deck distribution (starting with a 30-card deck)
 ### Special Support Cards
 *   ⚖️ **Investigation** (Max 2 per side per game) | Cost: **Free**
     *   *Effect:* Scans the opponent's corruption status.
+    *   *AI Use:* Has a **35% chance** to use Investigation against a Corrupted player. If it finds corruption, you lose **-2 Public Trust**.
     *   *If Corrupted:* Opponent loses **-2 Public Trust**, and you gain **+3 Budget**.
     *   *If Clean:* Nothing happens.
 *   🧼 **AUTO CLEAN** (Max 1 per side per game) | Cost: **Free**
@@ -127,6 +128,6 @@ The game ends immediately when any of the following occur:
 3.  **Term Limit Victory:** If the deck runs out of cards, you win if your DP is greater than or equal to the AI's DP.
 
 ### 💀 How to Lose
-1.  **Impeached:** Your Public Trust drops to **0** (via starting turns Corrupted or AI Investigations).
+1.  **Impeached:** Your Public Trust drops to **0** (via starting turns Corrupted).
 2.  **Development Defeat:** The AI reaches the target DP threshold before you.
 3.  **Term Limit Defeat:** If the deck runs out of cards, you lose if the AI has more DP than you.

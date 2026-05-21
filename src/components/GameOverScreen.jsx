@@ -4,17 +4,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function GameOverScreen() {
   const { state, restart } = useGame();
 
-  const isVictory = state.gameResult === 'victory' || state.gameResult === 'victory_termlimit';
+  const isVictory = state.gameResult === 'victory' || state.gameResult === 'victory_impeachment' || state.gameResult === 'victory_termlimit';
   const isLoss = state.gameResult && !isVictory;
 
   const messages = {
     victory: { title: 'VICTORY', subtitle: `You reached ${state.dpWinThreshold || 5} Development Points!`, color: 'from-emerald-400 to-emerald-700', textGlow: 'rgba(52,211,153,0.8)' },
+    victory_impeachment: { title: 'VICTORY', subtitle: "OPPONENT IMPEACHED: AI Public Trust hit zero.", color: 'from-emerald-400 to-emerald-700', textGlow: 'rgba(52,211,153,0.8)' },
     victory_termlimit: { title: 'VICTORY', subtitle: `TERM ENDED: You won with ${state.developmentPoints} DP vs AI's ${state.aiDP} DP.`, color: 'from-blue-400 to-blue-700', textGlow: 'rgba(96,165,250,0.8)' },
     defeat_impeachment: { title: 'DEFEAT', subtitle: 'IMPEACHED: Your Public Trust hit zero.', color: 'from-red-500 to-red-900', textGlow: 'rgba(239,68,68,0.8)' },
+    defeat_development: { title: 'DEFEAT', subtitle: `AI reached ${state.dpWinThreshold || 5} Development Points first.`, color: 'from-red-500 to-red-900', textGlow: 'rgba(239,68,68,0.8)' },
     defeat_termlimit: { title: 'DEFEAT', subtitle: `TERM ENDED: AI had ${state.aiDP} DP vs your ${state.developmentPoints} DP.`, color: 'from-orange-500 to-orange-900', textGlow: 'rgba(249,115,22,0.8)' },
   };
 
   const msg = messages[state.gameResult] || messages.defeat_impeachment;
+  const subtitle = state.gameResult === 'defeat_impeachment' && state.aiInvestigationResult
+    ? 'IMPEACHED: AI Investigation found your corruption. Trust -2.'
+    : msg.subtitle;
 
   return (
     <AnimatePresence>
@@ -60,7 +65,7 @@ export default function GameOverScreen() {
               className="text-xl sm:text-3xl text-white font-bold my-8 uppercase tracking-widest text-center px-4 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] focus:outline-none"
               style={{ fontFamily: "'Pixelify Sans', monospace" }}
             >
-              {msg.subtitle}
+              {subtitle}
             </motion.p>
             
             {/* Stats row */}

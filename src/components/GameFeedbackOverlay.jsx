@@ -3,13 +3,15 @@ import { useGame } from '../context/GameContext';
 
 export default function GameFeedbackOverlay() {
   const { state } = useGame();
-  const feedback = state.corruptionWheelResult || state.investigationResult || state.autoCleanResult || state.lastBuildResult;
+  const feedback = state.aiInvestigationResult || state.corruptionWheelResult || state.investigationResult || state.autoCleanResult || state.lastBuildResult;
 
   if (!feedback || state.phase === 'gameover' || state.phase === 'corruption_wheel') return null;
 
-  const isBad = state.corruptionWheelResult && !state.corruptionWheelResult.success;
+  const isBad = state.aiInvestigationResult || (state.corruptionWheelResult && !state.corruptionWheelResult.success);
   const isGood = state.autoCleanResult || state.investigationResult?.corrupted || state.corruptionWheelResult?.success || state.lastBuildResult;
-  const title = state.investigationResult
+  const title = state.aiInvestigationResult
+    ? 'AI USED INVESTIGATION'
+    : state.investigationResult
     ? state.investigationResult.corrupted ? 'OPPONENT IS CORRUPTED' : 'OPPONENT IS CLEAN'
     : state.autoCleanResult
       ? 'ACCOUNTABILITY COMPLETE'

@@ -121,6 +121,8 @@ Current regular support card pool:
 * Limit: Can appear up to **3 times per game** per side.
 * Effect:
   * Reveals whether the opponent is currently Corrupted.
+  * AI has a **35% chance** to use Investigation against a Corrupted player.
+  * If AI Investigation finds corruption, the player loses **-2 Public Trust**.
   * If the opponent is Corrupted:
     * Opponent loses **-2 Public Trust**.
     * Player gains **+3 Budget**.

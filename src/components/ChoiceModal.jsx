@@ -59,7 +59,7 @@ export default function ChoiceModal() {
               disabled={state.budget < corruptCost}
             >
               <div className="gov-choice-title gov-heading text-[11px]">CUT CORNERS</div>
-              <div className="gov-choice-sub text-[9px]">Cost {corruptCost} • {state.pendingCard.corruptReward || '+2 DP, Corrupted'}</div>
+              <div className="gov-choice-sub text-[9px]">Cost {corruptCost} • {state.pendingCard.corruptReward || '+1 DP, Corrupted'}</div>
             </button>
 
             {/* Bayanihan Option */}
