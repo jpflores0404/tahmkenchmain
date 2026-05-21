@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CardBinderModal from '../features/card-binder/CardBinderModal';
 import './HomePage.css';
 
 export default function HomePage() {
   const [showOptions, setShowOptions] = useState(false);
+  const [showBinder, setShowBinder] = useState(false);
   const [volume, setVolume] = useState(() => {
     const saved = localStorage.getItem('musicVolume');
     return saved !== null ? parseFloat(saved) : 0.5;
@@ -181,12 +183,20 @@ export default function HomePage() {
             <button className="hp-pixel-btn hp-option-btn hp-normal-game-btn hp-pop-in hp-pop-delay-1" onClick={handleNormalGame}>Normal Game<span className="hp-btn-subtitle">Win at 10DP</span></button>
             <button className="hp-pixel-btn hp-option-btn hp-quickplay-btn hp-pop-in hp-pop-delay-2" onClick={handleQuickplay}>Quickplay<span className="hp-btn-subtitle">Win at 5DP</span></button>
           </div>
-          <button className="hp-binder-container hp-pop-in hp-pop-delay-3" onClick={(e) => e.stopPropagation()}>
+          <button 
+            className="hp-binder-container hp-pop-in hp-pop-delay-3" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowBinder(true);
+            }}
+          >
             <img src="/BINDER.jpg" alt="Card Binder" className="hp-binder-img" />
             <span className="hp-binder-label">Card Binder</span>
           </button>
         </div>
       )}
+      
+      <CardBinderModal isOpen={showBinder} onClose={() => setShowBinder(false)} />
     </div>
   );
 }
